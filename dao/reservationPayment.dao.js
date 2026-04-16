@@ -1,4 +1,4 @@
-const db = require('../services/database/reservations.db').getPool();
+const db = require('../services/reservations.service');
 
 class ReservationPaymentDAO {
     async createPayment(reservation_id, amount, concept) {
@@ -8,7 +8,7 @@ class ReservationPaymentDAO {
              VALUES (?, ?, ?, 'pending')`,
             [reservation_id, amount, concept]
         );
-        return { id: result.insertId, reservation_id, amount, concept };
+        return { id: result.insertId };
     }
 
     async findByReservationId(reservation_id) {

@@ -1,4 +1,4 @@
-const db = require('../services/database/heritage.db').getPool();
+const db = require('../services/mysql.service'); // El original
 
 class CulturalSpaceDAO {
     async create(data) {
@@ -25,9 +25,9 @@ class CulturalSpaceDAO {
         return rows;
     }
 
-    async findByIdWithCapacity(id) {
+    async getCapacityAndStatus(id) {
         const [rows] = await db.execute(
-            'SELECT id, name, max_capacity, conservation_status FROM cultural_spaces WHERE id = ?',
+            'SELECT max_capacity, conservation_status FROM cultural_spaces WHERE id = ?',
             [id]
         );
         return rows[0] || null;

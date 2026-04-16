@@ -1,4 +1,4 @@
-const db = require('../services/database/reservations.db').getPool();
+const db = require('../services/reservations.service'); // El nuevo servicio
 
 class ReservationRequestDAO {
     async create(data) {
