@@ -4,7 +4,7 @@ class SpaceController {
     async create(req, res) {
         try {
             const { name, address, max_capacity, conservation_status, administrative_unit, description } = req.body;
-            
+
             if (!name || !address || !max_capacity || !administrative_unit) {
                 return res.status(400).json({
                     success: false,
@@ -13,7 +13,7 @@ class SpaceController {
             }
 
             const space = await culturalSpaceDAO.create({
-                name, address, max_capacity, 
+                name, address, max_capacity,
                 conservation_status: conservation_status || 'operational',
                 administrative_unit, description
             });
