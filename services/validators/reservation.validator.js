@@ -1,28 +1,28 @@
-const spaceDAO = require('../../dao/space.dao');
-const reservationDAO = require('../../dao/reservation.dao');
+const culturalSpaceDAO = require('../../dao/culturalSpace.dao');
+const reservationRequestDAO = require('../../dao/reservationRequest.dao');
 
 class ReservationValidator {
     async validateCreation(data) {
         const errors = [];
         const { space_id, requested_capacity, start_datetime, end_datetime } = data;
 
-        const spaceCheck = await spaceDAO.validateAvailability(space_id);
+        const space = await culturalSpaceDAO.findByIdWithCapacity(space_id);
         
-        if (!spaceCheck.exists) {
+        if (!space) {
             errors.push('Space does not exist in heritage database');
             return { valid: false, errors };
         }
 
-        if (!spaceCheck.operational) {
-            errors.push(`Space not operational (status: ${spaceCheck.status})`);
+        if (space.conservation_status !== 'operational') {
+            errors.push(`Space not operational (current: ${space.conservation_status})`);
         }
 
-        if (requested_capacity > spaceCheck.max_capacity) {
-            errors.push(`Capacity ${requested_capacity} exceeds maximum ${spaceCheck.max_capacity}`);
+        if (requested_capacity > space.max_capacity) {
+            errors.push(`Requested capacity (${requested_capacity}) exceeds maximum (${space.max_capacity})`);
         }
 
-        const hasOverlap = await reservationDAO.hasOverlap(space_id, start_datetime, end_datetime);
-        if (hasOverlap) {
+        const approved = await reservationRequestDAO.findApprovedBySpaceAndDate(space_id, start_datetime, end_datetime);
+        if (approved.length > 0) {
             errors.push('Date range overlaps with existing approved reservation');
         }
 
@@ -30,7 +30,7 @@ class ReservationValidator {
             errors.push('End datetime must be after start datetime');
         }
 
-        return { valid: errors.length === 0, errors };
+        return { valid: errors.length === 0, errors, space };
     }
 }
 
