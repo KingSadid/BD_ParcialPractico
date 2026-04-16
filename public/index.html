@@ -1,43 +1,134 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Test index</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Parcial BD</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; background: #f5f5f5; }
+        .section { background: white; padding: 20px; margin: 20px 0; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        h2 { color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px; }
+        .form-group { margin: 15px 0; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; color: #555; }
+        input, select, textarea { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
+        button { background: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; margin-top: 10px; }
+        button:hover { background: #0056b3; }
+        .result { margin-top: 15px; padding: 10px; border-radius: 4px; display: none; }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .info-box { background: #e7f3ff; padding: 10px; border-left: 4px solid #007bff; margin: 10px 0; font-size: 0.9em; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        pre { background: #f8f9fa; padding: 10px; overflow-x: auto; font-size: 0.85em; }
+    </style>
 </head>
-
 <body>
-  <div>
-    <h1>SQL Operations</h1>
+    <h1>🎭 Parcial BD Multimedia - Test Interface</h1>
+    
+    <div class="info-box">
+        <strong>Estado del Sistema:</strong> <span id="healthStatus">Verificando...</span>
+    </div>
 
-    <section>
-      <h2>Post Operation</h2>
-        <label for="name">Name:</label><br>
-        <input type="text" id="name" name="name" required><br><br>
-        <label for="birthdate">Birthdate:</label><br>
-        <input type="date" id="birthdate" name="birthdate" required><br><br>
+    <!-- Sección 1: Registrar Espacio -->
+    <div class="section">
+        <h2>1. Registrar Espacio Cultural</h2>
+        <form id="formSpace">
+            <div class="form-group">
+                <label>Nombre:</label>
+                <input type="text" id="spaceName" required>
+            </div>
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>Capacidad Máxima:</label>
+                    <input type="number" id="spaceCapacity" min="1" required>
+                </div>
+                <div class="form-group">
+                    <label>Estado:</label>
+                    <select id="spaceStatus">
+                        <option value="operational">Operativo</option>
+                        <option value="maintenance">Mantenimiento</option>
+                        <option value="closed_renovation">Cerrado</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Dependencia Administrativa:</label>
+                <input type="text" id="spaceUnit" required>
+            </div>
+            <div class="form-group">
+                <label>Dirección:</label>
+                <input type="text" id="spaceAddress" required>
+            </div>
+            <div class="form-group">
+                <label>Descripción:</label>
+                <textarea id="spaceDesc" rows="2"></textarea>
+            </div>
+            <button type="submit">Registrar Espacio</button>
+        </form>
+        <div id="resultSpace" class="result"></div>
+    </div>
 
-        <button id="postBtn">Send</button>
-      <p id="postSqlResult"></p>
-    </section>
+    <!-- Sección 2: Crear Reserva -->
+    <div class="section">
+        <h2>2. Crear Solicitud de Reserva</h2>
+        <div class="info-box">
+            Reglas: El espacio debe existir, estar operativo, tener capacidad suficiente y no solaparse con reservas aprobadas.
+        </div>
+        <form id="formReservation">
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>ID del Espacio:</label>
+                    <input type="number" id="resSpaceId" min="1" required>
+                </div>
+                <div class="form-group">
+                    <label>Aforo Solicitado:</label>
+                    <input type="number" id="resCapacity" min="1" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Organización Solicitante:</label>
+                <input type="text" id="resOrg" required>
+            </div>
+            <div class="form-group">
+                <label>Nombre del Evento:</label>
+                <input type="text" id="resEvent" required>
+            </div>
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>Fecha/Hora Inicio:</label>
+                    <input type="datetime-local" id="resStart" required>
+                </div>
+                <div class="form-group">
+                    <label>Fecha/Hora Fin:</label>
+                    <input type="datetime-local" id="resEnd" required>
+                </div>
+            </div>
+            <button type="submit">Crear Reserva</button>
+        </form>
+        <div id="resultReservation" class="result"></div>
+    </div>
 
-    <section>
-      <h2>Get All Entries</h2>
-      <button id="getAllBtn">Get All</button>
-      <ul id="getAllResult"></ul>
-    </section>
+    <!-- Sección 3: Consultar Reserva -->
+    <div class="section">
+        <h2>3. Consultar Estado de Reserva</h2>
+        <div class="grid-2">
+            <div class="form-group">
+                <label>ID de Reserva:</label>
+                <input type="number" id="queryResId" min="1">
+            </div>
+            <div style="padding-top: 25px;">
+                <button onclick="queryReservation()">Consultar</button>
+            </div>
+        </div>
+        <div id="resultQuery" class="result"></div>
+    </div>
 
-    <section>
-      <h2>Get Entry by ID</h2>
-        <label for="id">id:</label><br>
-        <input type="text" id="id" name="id" required><br><br>
-        <button id="getOneBtn">Send</button>
-      <ul id="getOneResult"></ul>
-    </section>
-  </div>
+    <!-- Sección 4: Listar Espacios -->
+    <div class="section">
+        <h2>4. Listar Espacios Operativos</h2>
+        <button onclick="loadSpaces()">Actualizar Lista</button>
+        <div id="listSpaces" style="margin-top: 15px;"></div>
+    </div>
 
-  <script src="./js/sql.js"></script>
+    <script src="./js/sql.js"></script>
 </body>
-
 </html>
