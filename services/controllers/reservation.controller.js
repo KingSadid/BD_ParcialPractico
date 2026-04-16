@@ -1,34 +1,33 @@
-const reservationDAO = require('../../dao/reservation.dao');
+const reservationRequestDAO = require('../../dao/reservationRequest.dao');
+const statusHistoryDAO = require('../../dao/statusHistory.dao');
 const reservationValidator = require('../validators/reservation.validator');
 
 class ReservationController {
     async create(req, res) {
         try {
-            const { space_id, requesting_organization, event_name, requested_capacity, start_datetime, end_datetime } = req.body;
-
-            if (!space_id || !requesting_organization || !event_name || !requested_capacity || !start_datetime || !end_datetime) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'All fields required'
-                });
-            }
-
-            const validation = await reservationValidator.validateCreation({
-                space_id: parseInt(space_id),
-                requested_capacity: parseInt(requested_capacity),
-                start_datetime, end_datetime
-            });
+            const data = req.body;
+            const validation = await reservationValidator.validateCreation(data);
 
             if (!validation.valid) {
                 return res.status(422).json({ success: false, errors: validation.errors });
             }
 
-            const reservation = await reservationDAO.create({
-                space_id: parseInt(space_id), requesting_organization, event_name,
-                requested_capacity: parseInt(requested_capacity), start_datetime, end_datetime
-            });
+            // Create reservation
+            const reservation = await reservationRequestDAO.create(data);
+            
+            // Create initial history entry
+            await statusHistoryDAO.createEntry(
+                reservation.id, 
+                null, 
+                'pending', 
+                'Reservation request created'
+            );
 
-            res.status(201).json({ success: true, data: reservation });
+            res.status(201).json({ 
+                success: true, 
+                message: 'Reservation created successfully',
+                data: reservation 
+            });
         } catch (error) {
             res.status(500).json({ success: false, error: error.message });
         }
@@ -36,11 +35,20 @@ class ReservationController {
 
     async getStatus(req, res) {
         try {
-            const reservation = await reservationDAO.findByIdWithHistory(req.params.id);
+            const reservation = await reservationRequestDAO.findById(req.params.id);
             if (!reservation) {
-                return res.status(404).json({ success: false, message: 'Not found' });
+                return res.status(404).json({ success: false, message: 'Reservation not found' });
             }
-            res.json({ success: true, data: reservation });
+
+            const history = await statusHistoryDAO.findByReservationId(req.params.id);
+            
+            res.json({
+                success: true,
+                data: {
+                    ...reservation,
+                    status_history: history
+                }
+            });
         } catch (error) {
             res.status(500).json({ success: false, error: error.message });
         }
