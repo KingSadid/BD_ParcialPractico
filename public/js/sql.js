@@ -3,12 +3,12 @@ async function checkHealth() {
     try {
         const res = await fetch('/health');
         const data = await res.json();
-        const status = data.databases.heritage.connected && data.databases.reservations.connected 
-            ? ' Conectado' 
+        const status = data.databases.heritage.connected && data.databases.reservations.connected
+            ? ' Conectado'
             : ' Error de conexión';
         document.getElementById('healthStatus').textContent = status;
     } catch (e) {
-        document.getElementById('healthStatus').textContent = '❌ Sin conexión';
+        document.getElementById('healthStatus').textContent = ' Sin conexión';
     }
 }
 
@@ -17,8 +17,8 @@ function showResult(elementId, success, message, data = null) {
     const el = document.getElementById(elementId);
     el.className = `result ${success ? 'success' : 'error'}`;
     el.style.display = 'block';
-    
-    let html = `<strong>${success ? '✅' : '❌'} ${message}</strong>`;
+
+    let html = `<strong>${success ? '' : ''} ${message}</strong>`;
     if (data) {
         html += `<pre>${JSON.stringify(data, null, 2)}</pre>`;
     }
@@ -28,7 +28,7 @@ function showResult(elementId, success, message, data = null) {
 // 1. Register Space
 document.getElementById('formSpace').addEventListener('submit', async (e) => {
     e.preventDefault();
-    
+
     const payload = {
         name: document.getElementById('spaceName').value,
         max_capacity: parseInt(document.getElementById('spaceCapacity').value),
@@ -44,10 +44,10 @@ document.getElementById('formSpace').addEventListener('submit', async (e) => {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         });
-        
+
         const data = await res.json();
         showResult('resultSpace', data.success, data.success ? 'Espacio registrado' : 'Error', data.data);
-        
+
         if (data.success) {
             e.target.reset();
             loadSpaces();
@@ -60,7 +60,7 @@ document.getElementById('formSpace').addEventListener('submit', async (e) => {
 // 2. Create Reservation
 document.getElementById('formReservation').addEventListener('submit', async (e) => {
     e.preventDefault();
-    
+
     const payload = {
         space_id: parseInt(document.getElementById('resSpaceId').value),
         requesting_organization: document.getElementById('resOrg').value,
@@ -76,9 +76,9 @@ document.getElementById('formReservation').addEventListener('submit', async (e) 
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         });
-        
+
         const data = await res.json();
-        
+
         if (data.success) {
             showResult('resultReservation', true, 'Reserva creada exitosamente', data.data);
             e.target.reset();
@@ -98,13 +98,13 @@ async function queryReservation() {
     try {
         const res = await fetch(`/api/reservations/${id}`);
         const data = await res.json();
-        
+
         if (data.success) {
             const r = data.data;
-            const history = r.status_history.map(h => 
+            const history = r.status_history.map(h =>
                 `${h.new_status} (${new Date(h.created_at).toLocaleString()})`
             ).join('\n');
-            
+
             showResult('resultQuery', true, 'Reserva encontrada', {
                 id: r.id,
                 event: r.event_name,
@@ -127,16 +127,16 @@ async function loadSpaces() {
     try {
         const res = await fetch('/api/spaces');
         const data = await res.json();
-        
+
         const container = document.getElementById('listSpaces');
         if (!data.success || data.data.length === 0) {
             container.innerHTML = '<p>No hay espacios operativos</p>';
             return;
         }
-        
+
         let html = '<table style="width:100%; border-collapse: collapse;">';
         html += '<tr style="background:#007bff; color:white"><th style="padding:8px">ID</th><th style="padding:8px">Nombre</th><th style="padding:8px">Capacidad</th><th style="padding:8px">Dirección</th></tr>';
-        
+
         data.data.forEach(space => {
             html += `<tr style="border-bottom:1px solid #ddd">
                 <td style="padding:8px">${space.id}</td>
