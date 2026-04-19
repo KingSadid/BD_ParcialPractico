@@ -4,8 +4,8 @@ async function checkHealth() {
         const res = await fetch('/health');
         const data = await res.json();
         const status = data.databases.heritage.connected && data.databases.reservations.connected 
-            ? '✅ Conectado' 
-            : '❌ Error de conexión';
+            ? ' Conectado' 
+            : ' Error de conexión';
         document.getElementById('healthStatus').textContent = status;
     } catch (e) {
         document.getElementById('healthStatus').textContent = '❌ Sin conexión';
